@@ -1,0 +1,1 @@
+export const error500: String = 'Ocurrió un error en la base de datos';
