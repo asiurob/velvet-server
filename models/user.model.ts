@@ -1,40 +1,32 @@
-import mongos from 'mongoose';
-import validator from 'mongoose-unique-validator';
-import { Db } from 'mongodb';
+import mongo from 'mongoose'
 
-export const User = new mongos.Schema({
+const schema = new mongo.Schema({
 
-    personal_data: {
-        name:       { type: String, required: [ true, 'El nombre es necesario' ], max: 50 },
-        last_name:  { type: String, required: [ true, 'El apellido es necesario' ], max: 100 },
-        user_name:  { type: String, unique: [true, 'El usuario está duplicado'], required:[ true, 'El usuario es necesario' ], max: 25 },
-        email:      { type: String, unique: [true, 'El correo está duplicado'], required:[ true, 'El correo es necesario' ], max: 100 },
-        gender:     { type: String, max: 1 }
-    },
+    name:     { type: String, required: [ true, 'El nombre es necesario' ] },
+    lastname: { type: String, required: [ true, 'El apellido es necesario' ] },
+    gender:   { type: Number, required: [ true, 'El género es necesario' ] },
+    phone:    { type: Number, required: [ true, 'El teléfono es necesario' ] },
+    rol:      { type: mongo.Schema.Types.ObjectId, ref: 'Rol' },
+    photo:    { type: String, default: 'default.png' },
 
-    company_data: {
-        role:       { type: mongos.Schema.Types.ObjectId, ref: 'Role' },
-        job:        { type: mongos.Schema.Types.ObjectId, ref: 'Job'  },
-        permissions: [{
-            module: { type: mongos.Schema.Types.ObjectId, ref: 'Module' },
-            chmod:  { type: String, min: 1, max: 5, default: 'r' }
-        }] 
-    },
-    engine_data: {
-        password:   { type: String },
-        last_login: { type: Date },
-        added_by:   { type: String },
-        added_date: { type: Date, default: Date.now },
-        mod_log: [{
-            mod_by:   { type: String },
-            mod_date: { type: Date, default: Date.now },
-        }]
+    username: { type: String, required: [ true, 'El usuario es importante' ], unique: [ true, 'El usuario ya existe' ] },
+    password: { type: String, required: [ true, 'Se necesita una contraseña' ] },
+    link:     { type: String, required: [ true, 'Se necesita el link de uso' ] },
+
+    control: {
+        status:       { type: Boolean, default: true },
+        exists:       { type: Boolean, default: true },
+        addedBy:      { type: mongo.Schema.Types.ObjectId, ref: 'User' },
+        addedDate:    { type: Date, default: Date.now },
+        modification: [
+            {
+                _id: false,
+                user:   { type: mongo.Schema.Types.ObjectId, ref: 'User' },
+                date:   { type: Date, default: Date.now },
+                fields: []
+            }
+        ] 
     }
-}, { collection: 'users' });
+}, { collection: 'users' })
 
-User.plugin( validator, { message: 'El {PATH} está no es válido' } );
-
-const UserModel = mongos.model('User', User );
-
-export default UserModel;
-
+export const UserModel = mongo.model( 'User', schema )
